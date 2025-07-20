@@ -9,15 +9,14 @@ export default function ProdutoItem({ produto, onDelete }) {
   const navigate = useNavigate();
 
   // Ajuste conforme seu backend
-  const BASE_URL_IMAGENS = 'http://localhost:8080';
+  const BASE_URL_IMAGENS = 'http://100.96.93.80:8080';
 
   // Usa o campo correto
   const imagemPath = produto.imagem;
   const imagemURL = imagemPath
-    ? imagemPath.startsWith('http')
-      ? imagemPath
-      : `${BASE_URL_IMAGENS}${imagemPath}`
-    : null;
+  ? `${BASE_URL_IMAGENS}${imagemPath}`
+  : null;
+
 
   const handleDelete = () => {
     if (window.confirm(`Excluir "${produto.nome}"?`)) {
@@ -55,8 +54,19 @@ export default function ProdutoItem({ produto, onDelete }) {
     ? dayjs(produto.validade).format('DD/MM/YYYY')
     : '';
 
-  const vencido = produto.validade && dayjs(produto.validade).isBefore(dayjs(), 'day');
-  const bgColor = vencido ? '#f8d7da' : '#fff8dc';
+ const diasParaVencer = produto.validade
+  ? dayjs(produto.validade).diff(dayjs(), 'day')
+  : null;
+
+let bgColor = '#fff8dc'; // padrão amarelo claro
+if (diasParaVencer !== null) {
+  if (diasParaVencer < 0) {
+    bgColor = '#f8d7da'; // vermelho para vencido
+  } else if (diasParaVencer > 30) {
+    bgColor = '#d4edda'; // verde para mais de 30 dias
+  }
+}
+
 
   return (
     <div style={{
@@ -79,7 +89,7 @@ export default function ProdutoItem({ produto, onDelete }) {
               borderRadius: 4,
               border: '1px solid #ccc'
             }}
-            onError={(e) => { e.target.src = '/sem-imagem.png'; }}
+            onError={(e) => { e.target.onerror = null; e.target.src = '/sem-imagem.png'; }}
           />
         ) : (
           <div

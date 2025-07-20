@@ -12,8 +12,14 @@ export const atualizarProduto = (id, produto) => axios.put(`${API_BASE_URL}/${id
 export const excluirProduto = (id) => axios.delete(`${API_BASE_URL}/${id}`);
 
 //imagem upload
-export const uploadImagem = (file) => {
+export function uploadImagem(file, sessao) {
   const formData = new FormData();
   formData.append('file', file);
-  return axios.post('http://100.96.93.80:8080/api/uploads', formData);
-};
+
+  // Sessão na URL
+  return axios.post(`http://100.96.93.80:8080/api/uploads/${sessao}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+}

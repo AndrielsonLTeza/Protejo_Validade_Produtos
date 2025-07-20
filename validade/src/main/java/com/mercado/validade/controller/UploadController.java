@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -16,31 +17,41 @@ import java.util.UUID;
 @CrossOrigin(origins = "http://100.96.93.80:3000")
 public class UploadController {
 
-    // Caminho de onde salvar
-   private static final String UPLOAD_DIR = "C:/Users/andri/Downloads/validade/uploads/";
+    private static final String UPLOAD_BASE_DIR = "C:/Users/andri/Downloads/validade/uploads/";
 
+    private static final Set<String> SESSOES_VALIDAS = Set.of(
+        "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "padaria", "frios"
+    );
 
-
-    @PostMapping
-    public ResponseEntity<?> uploadImagem(@RequestParam("file") MultipartFile file) {
+    @PostMapping("/{sessao}")
+    public ResponseEntity<?> uploadImagem(
+            @PathVariable String sessao,
+            @RequestParam("file") MultipartFile file
+    ) {
         if (file.isEmpty()) {
-            return ResponseEntity.badRequest().body("Arquivo vazio");
+            return ResponseEntity.badRequest().body("Arquivo vazio.");
+        }
+
+        if (!SESSOES_VALIDAS.contains(sessao)) {
+            return ResponseEntity.badRequest().body("Sessão inválida: " + sessao);
         }
 
         try {
-            Files.createDirectories(Paths.get(UPLOAD_DIR));
+            String folderPath = UPLOAD_BASE_DIR + sessao + "/";
+            Files.createDirectories(Paths.get(folderPath));
 
             String filename = UUID.randomUUID() + "-" + StringUtils.cleanPath(file.getOriginalFilename());
-            Path filepath = Paths.get(UPLOAD_DIR, filename);
+            Path filepath = Paths.get(folderPath, filename);
             Files.copy(file.getInputStream(), filepath, StandardCopyOption.REPLACE_EXISTING);
 
-            String url = "http://100.96.93.80:8080/uploads/" + filename;
+            String url = "http://100.96.93.80:8080/uploads/" + sessao + "/" + filename;
             return ResponseEntity.ok(Map.of("url", url));
         } catch (IOException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body("Erro ao salvar arquivo: " + e.getMessage());
+                    .body("Erro ao salvar arquivo: " + e.getMessage());
         }
     }
-}
 
+    
+}

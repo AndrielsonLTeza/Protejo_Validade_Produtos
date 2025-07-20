@@ -168,7 +168,7 @@ currentY = finalY + 15;
                 <div style={{ flex: 2 }}>Nome</div>
                 <div style={{ flex: 2 }}>Marca</div>
                 <div style={{ flex: 2 }}>Validade</div>
-                <div style={{ flex: 2 }}>Código</div>
+                <div style={{ flex: 3 }}>Código</div>
                 <div style={{ flex: 2 }}>Ações</div>
               </div>
 
